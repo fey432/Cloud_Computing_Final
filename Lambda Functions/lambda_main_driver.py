@@ -13,8 +13,6 @@ from email.mime.application import MIMEApplication
 from botocore.exceptions import ClientError
 
 
-timeout = time.time() + 60*5  #5 Minute from now
-
 def lambda_handler(event, context):
     read_bucket = event["Records"][0]["s3"]["bucket"]["name"]
     document = event["Records"][0]["s3"]["object"]["key"]
@@ -88,6 +86,7 @@ def lambda_handler(event, context):
     
     second_flag = 0
     #Deal with waiting for DynamoDB Entry for new images
+    timeout = time.time() + 60*5  #5 Minute from now
     if(flag == 1):
         
         while True:
@@ -126,7 +125,7 @@ def lambda_handler(event, context):
         SUBJECT = "Error Trying to Get Your Results"
         BODY_TEXT = "There was an error trying to get your results. Please try to upload again!"
         try:
-            email_response = client.send_raw_email(
+            email_response = mail_client.send_raw_email(
                 Destination={
                     'ToAddresses':[
                         RECIPIENT,

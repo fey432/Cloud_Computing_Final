@@ -213,7 +213,9 @@
             if (files && send_email) {
                 var file = files[0];
                 var fileName = file.name;
-                var filePath = bucketName + fileName;
+                let extension = fileName.split('.').pop().toLowerCase();
+                let timenow = Date.now();
+                var filePath = bucketName + timenow + '.' + extension;
                 var fileUrl = 'https://' + bucketRegion + '.amazonaws.com/' + filePath;
 
 
