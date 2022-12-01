@@ -25,4 +25,4 @@ If the link does not work, please copy this link in your browser http://hardcode
     6. Depending on the image is new or not, the email may take up to 5 minutes to receive.
     7. If you receive an email saying that there was error trying to get your results, please try the upload again.
 
-**NOTE:** As of 11/30/202, there is currently an issue with S3 Buckets and Trigger Events with Lambda. `.TIFF` file formats currently do not trigger.
+**NOTE:** As of 11/30/2022, there is currently an issue with S3 Buckets and Trigger Events with Lambda. `.TIFF` file formats currently do not trigger.
