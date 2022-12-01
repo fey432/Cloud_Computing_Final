@@ -1,0 +1,256 @@
+<!doctype html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>HardCoders Image Uploader</title>
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-light_blue.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        #view-source {
+            position: fixed;
+            display: block;
+            right: 0;
+            bottom: 0;
+            margin-right: 40px;
+            margin-bottom: 40px;
+            z-index: 900;
+        }
+    </style>
+
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.357.0.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript">
+        //Bucket Configurations
+
+        var bucketName = 'hardcoders-front-end';
+        var bucketRegion = 'us-east-1';
+        var IdentityPoolId = 'us-east-1:9c7aeec0-f047-44ce-ba29-79215fe70303';
+
+
+        AWS.config.update({
+            region: bucketRegion,
+            credentials: new AWS.CognitoIdentityCredentials({
+                IdentityPoolId: IdentityPoolId
+            })
+        });
+
+        var s3 = new AWS.S3({
+            apiVersion: '2006-03-01',
+            params: { Bucket: bucketName }
+        });
+
+
+
+    </script>
+</head>
+
+<body>
+    <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+        <header class="demo-header mdl-layout__header mdl-color--blue-300 mdl-color-text--white">
+            <div class="mdl-layout__header-row">
+                <span class="mdl-layout-title">HardCoders OCR Word Count Serverless Function</span>
+            </div>
+        </header>
+        <div class="demo-drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
+
+            <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
+                <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons"
+                        role="presentation">home</i> Home</a>
+            </nav>
+        </div>
+        <main class="mdl-layout__content mdl-color--grey-100">
+            <div class="mdl-grid demo-content">
+                <div
+                    class="demo-updates mdl-card mdl-shadow--2dp mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--12-col-desktop">
+                    <div class="mdl-card__title mdl-card--expand mdl-color--teal-300"
+                        style="color: #fff; background: url('https://assets-global.website-files.com/5aa7081220a301f2a3644f3b/607a11e6fa43680eb515a338_historical-documents-blog-image-compressed.jpg') center / cover;">
+                        <h2 class="mdl-card__title-text" style="font-size: 200%;">Image Picker</h2>
+                    </div>
+                    <div class="mdl-card__supporting-text mdl-color-text--grey-600">
+                        Type in your email address below to be sent the results. Please ensure that your email account 
+                        is verified through Amazon Simple Email Services.
+                        To verify your email, register with the card below.
+                    </div>
+                    <div class="mdl-card__supporting-text mdl-color-text--grey-600">
+                        Also, please make sure your file does not contain special characters or white spaces. Please reference this site for any questions:
+                        <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html">https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html</a>
+                    </div>
+                    <div class="demo-cards mdl-cell mdl-cell--4-col mdl-cell--8-col-tablet mdl-grid ">
+                        <form id="form1">
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="email" id="email" />
+                                <label class="mdl-textfield__label" for="email">Type in your email address...</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="mdl-card__supporting-text mdl-color-text--grey-600">
+                        Tap to select or upload an image below...
+                    </div>
+                    <div class="mdl-card__supporting-text mdl-color-text--grey-600">
+                        Currently supported file extensions are .JPG .JPEG .TIFF .PNG
+                    </div>
+                    <div class="mdl-card__supporting-text mdl-color-text--grey-600">
+                        <div id="file-upload-filename2"></div>
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border">
+
+                        <body>
+                            <button type="button"
+                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored show-modal">Select
+                                an Image</button>
+                            <button type="button"
+                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored"
+                                onclick="s3upload()">Upload</button>
+                            <dialog class="mdl-dialog">
+                                <div class="mdl-dialog__content">
+                                    <p>
+                                        Choose an option
+                                    </p>
+                                    <form>
+                                        <p hidden><input type="file" id="fileUpload" accept="image/png, image/jpg, image/jpeg, image/tiff"></p>
+                                        <label for="fileUpload"
+                                            class="mdl-button mdl-js-button mdl-button--colored mdl-color--blue-300 mdl-js-ripple-effect mdl-color-text--white">
+                                            Choose File</label>
+                                        <div id="file-upload-filename">
+                                        </div>
+                                    </form>
+                                    <div class="mdl-dialog__actions mdl-dialog__actions--full-width">
+                                        <button
+                                            class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored close">OK</button>
+                                    </div>
+                                </div>
+                            </dialog>
+                            <script>
+                                var dialog = document.querySelector('dialog');
+                                var showModalButton = document.querySelector('.show-modal');
+                                if (!dialog.showModal) {
+                                    dialogPolyfill.registerDialog(dialog);
+                                }
+                                showModalButton.addEventListener('click', function () {
+                                    dialog.showModal();
+                                });
+                                dialog.querySelector('.close').addEventListener('click', function () {
+                                    dialog.close();
+                                });
+
+                                var input = document.getElementById('fileUpload');
+                                var infoArea = document.getElementById('file-upload-filename');
+                                var infoArea2 = document.getElementById('file-upload-filename2');
+
+                                input.addEventListener('change', showFileName);
+                                function showFileName(event) {
+                                    var input = event.srcElement;
+
+                                    var fileName = input.files[0].name;
+                                    infoArea.textContent = 'File name: ' + fileName;
+                                    infoArea2.textContent = 'File Selected: ' + fileName;
+                                }
+                            </script>
+                        </body>
+                    </div>
+                    <progress max=”100” value=”0” style="width:100%;border:none;height:5px"></progress>
+                </div>
+            </div>
+
+            <div class="mdl-grid demo-content">
+                <div
+                    class="demo-updates mdl-card mdl-shadow--2dp mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--12-col-desktop">
+                    <div class="mdl-card__title mdl-card--expand mdl-color--teal-300"
+                        style="color: #fff; background: url('https://www.boatus.com/-/media/expert-advice-archive/2018/april/cirrus-clouds.ashx?la=en&hash=18F09F936A226DB2B995A59A674B57AA') center / cover;">
+                        <h2 class="mdl-card__title-text" style="color:#37474F; font-size: 200%;">Amazon Simple Email
+                            Service (SES) Verification</h2>
+                    </div>
+                    <div class="mdl-card__supporting-text mdl-color-text--grey-600">
+                        Type your email address to be verified by Amazon SES below.
+                        You should receive an email shortly to verify your email.
+                    </div>
+                    <div class="demo-cards mdl-cell mdl-cell--4-col mdl-cell--8-col-tablet mdl-grid ">
+                        <form id="form2">
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="email" id="email2" />
+                                <label class="mdl-textfield__label" for="email">Type in your email address...</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border">
+
+                        <body>
+                            <button type="button"
+                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored show-modal"
+                                onclick="verEmail()">Verify</button>
+                        </body>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script type="text/javascript">
+
+        $('#form1').on('keyup keypress', function (e) {
+            var keyCode = e.keyCode || e.which;
+            if (keyCode === 13) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        $('#form2').on('keyup keypress', function (e) {
+            var keyCode = e.keyCode || e.which;
+            if (keyCode === 13) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        function s3upload() {
+            var files = document.getElementById('fileUpload').files;
+            var send_email = document.getElementById('email').value;
+            if (files && send_email) {
+                var file = files[0];
+                var fileName = file.name;
+                var filePath = bucketName + fileName;
+                var fileUrl = 'https://' + bucketRegion + '.amazonaws.com/' + filePath;
+
+
+                s3.upload({
+                    Key: filePath,
+                    Body: file,
+                    ACL: 'public-read',
+                    Metadata: { 'email': send_email }
+                }, function (err, data) {
+                    if (err) {
+                        reject('error');
+                    }
+
+                    alert('Successfully Uploaded!');
+                }).on('httpUploadProgress', function (progress) {
+                    var uploaded = parseInt((progress.loaded * 100) / progress.total);
+                    $("progress").attr('value', uploaded);
+                });
+            }
+        };
+
+        function verEmail() {
+            var verify_email_address = document.getElementById('email2').value;
+            if (verify_email_address) {
+                var ses = new AWS.SES({ apiVersion: '2010-12-01' }).verifyEmailIdentity({ EmailAddress: verify_email_address }).promise();
+                ses.then(
+                    function (data) {
+                        alert('Verification Sent');
+                        console.log("Email verification initiated");
+                    }).catch(
+                        function (err) {
+                            console.error(err, err.stack);
+                        });
+            }
+        };
+    </script>
+    <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</body>
+
+</html>
